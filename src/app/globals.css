@@ -1,0 +1,105 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+  body {
+    @apply bg-paper font-sans text-ink-900 antialiased;
+  }
+  h1,
+  h2,
+  h3 {
+    @apply text-ink-950;
+  }
+}
+
+@layer components {
+  /* Flat, bordered surface. Hierarchy comes from borders and spacing, not shadows. */
+  .panel {
+    @apply rounded-md border border-ink-100 bg-white;
+  }
+
+  /* ---------- Forms ---------- */
+  .label {
+    @apply mb-1.5 block text-sm font-medium text-ink-800;
+  }
+  .hint {
+    @apply mt-1 text-xs text-ink-500;
+  }
+  .field-error {
+    @apply mt-1 text-xs font-medium text-rose-700;
+  }
+  /* text-base on phones keeps iOS from zooming into the field */
+  .input {
+    @apply block w-full rounded-md border border-ink-200 bg-white px-3 py-2.5 text-base text-ink-900 placeholder:text-ink-300 focus:border-lagoon-500 focus:outline-none focus:ring-2 focus:ring-lagoon-500/30 disabled:bg-ink-50 disabled:text-ink-500 sm:text-sm;
+  }
+  .input-invalid {
+    @apply border-rose-500 focus:border-rose-500 focus:ring-rose-500/30;
+  }
+
+  /* ---------- Buttons ---------- */
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-md px-4 py-2.5 text-sm font-semibold transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-lagoon-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60;
+  }
+  .btn-primary {
+    @apply btn bg-ink-900 text-white hover:bg-ink-700;
+  }
+  .btn-brass {
+    @apply btn bg-brass-300 text-ink-950 hover:bg-brass-200;
+  }
+  .btn-secondary {
+    @apply btn border border-ink-200 bg-white text-ink-800 hover:bg-ink-50;
+  }
+  .btn-danger {
+    @apply btn border border-rose-200 bg-white text-rose-700 hover:bg-rose-50;
+  }
+  .btn-sm {
+    @apply px-3 py-1.5 text-xs;
+  }
+
+  /* ---------- Room key tag: the one signature element ---------- */
+  .key-tag {
+    @apply relative inline-flex items-center rounded-md border border-brass-500/50 bg-brass-200 py-0.5 pl-5 pr-2.5 text-sm font-bold tabular-nums text-ink-950;
+  }
+  .key-tag::before {
+    content: "";
+    @apply absolute left-1.5 top-1/2 h-1.5 w-1.5 -translate-y-1/2 rounded-full bg-white ring-1 ring-brass-600/50;
+  }
+  .key-tag-lg {
+    @apply py-1.5 pl-9 pr-4 text-3xl leading-none;
+  }
+  .key-tag-lg::before {
+    @apply left-3 h-2.5 w-2.5;
+  }
+  .key-tag-muted {
+    @apply border-dashed border-ink-300 bg-ink-100 text-ink-500;
+  }
+  .key-tag-muted::before {
+    @apply ring-ink-300;
+  }
+}
+
+/* Respect the user's reduced-motion setting */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Access-code dots: a short shake after a wrong code (skipped when the user prefers reduced motion). */
+@keyframes pin-shake {
+  10%, 90% { transform: translateX(-2px); }
+  20%, 80% { transform: translateX(4px); }
+  30%, 50%, 70% { transform: translateX(-6px); }
+  40%, 60% { transform: translateX(6px); }
+}
+.pin-shake {
+  animation: pin-shake 0.4s;
+}
