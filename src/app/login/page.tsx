@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { PinPad } from "@/components/auth/PinPad";
+import { InstallButton } from "@/components/layout/InstallButton";
 import { Brand } from "@/components/layout/Brand";
 import { translator } from "@/lib/i18n";
 
@@ -26,6 +27,9 @@ export default function LoginPage() {
           <h1 className="text-center font-serif text-3xl font-semibold tracking-tight">{t("login.title")}</h1>
           <p className="mb-8 mt-2 text-center text-sm text-ink-600">{t("login.subtitle")}</p>
           <PinPad />
+          <div className="mt-6 flex justify-center">
+            <InstallButton lang="fr" />
+          </div>
         </div>
       </section>
     </main>

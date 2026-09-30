@@ -91,6 +91,8 @@ Open **SQL Editor** and run the files in `supabase/migrations/` **in this order*
 5. `20260920000006_short_stay_and_settings.sql` - **two room types**, short-stay rates, rebuilt reports, and the `app_settings` table behind the Settings screen
 6. `20260918000004_seed_sample_rooms.sql` - *optional* sample rooms; run it **after** step 5, or skip it and add rooms in the app
 
+7. `20260921000007_room_delete.sql` - lets the administrator **delete** a room (only one that never had a stay; otherwise take it out of service)
+
 Prefer the CLI? `supabase link --project-ref <ref>` then `supabase db push`.
 
 ### 3. Lock down sign-ups (important)
@@ -166,6 +168,10 @@ Open <http://localhost:3000> and enter a code. For a production check: `npm run 
 - Codes are compared in constant time and wrong attempts are rate-limited.
 - All input is validated on the server (zod), and search text is escaped before it reaches the database.
 - Security headers (`X-Frame-Options`, `nosniff`, `Referrer-Policy`) are set in `next.config.mjs`. Serve the app over **HTTPS** outside `localhost`.
+
+## Installing as an app (PWA)
+
+In production (HTTPS) the app is installable: Chrome/Edge/Android show an **Install the app** link (login screen and sidebar); on iPhone/iPad use Share -> Add to Home Screen. The service worker only caches an offline page, never guest data.
 
 ## Deploying
 

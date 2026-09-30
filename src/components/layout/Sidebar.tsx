@@ -4,6 +4,7 @@ import { ROLE_KEYS } from "@/lib/constants";
 import { translator, type Lang } from "@/lib/i18n";
 import type { Profile } from "@/lib/types";
 import { Brand } from "./Brand";
+import { InstallButton } from "./InstallButton";
 import { LanguageSwitch } from "./LanguageSwitch";
 import { SideNav } from "./NavLinks";
 import { SignOutButton } from "./SignOutButton";
@@ -40,6 +41,10 @@ export function Sidebar({ profile, lang }: { profile: Profile; lang: Lang }) {
             <LanguageSwitch lang={lang} tone="light" />
           </div>
         ) : null}
+
+        <div className="mt-3 px-3">
+          <InstallButton lang={lang} className="text-xs font-medium text-brass-300 underline underline-offset-2 hover:text-white" />
+        </div>
 
         <SignOutButton
           lang={lang}

@@ -103,3 +103,31 @@ export async function setRoomActive(roomId: string, active: boolean): Promise<Ac
   refreshPages();
   return {};
 }
+
+/**
+ * Permanently deletes a room. Only a room that never had a stay can go: history
+ * is protected by the database (stays.room_id is "on delete restrict"), and a
+ * room that has had guests should be taken out of service instead.
+ */
+export async function deleteRoom(roomId: string): Promise<ActionResult> {
+  const { t } = await getT();
+
+  if (!uuidSchema.safeParse(roomId).success) return { error: t("err.generic") };
+
+  const supabase = await createClient();
+
+  const { data: stays } = await supabase.from("stays").select("id, status").eq("room_id", roomId).limit(50);
+  if (stays && stays.some((stay) => stay.status === "active")) return { error: t("rooms.deleteOccupied") };
+  if (stays && stays.length > 0) return { error: t("rooms.deleteHasStays") };
+
+  const { data, error } = await supabase.from("rooms").delete().eq("id", roomId).select("id");
+
+  if (error) {
+    if (error.code === "23503") return { error: t("rooms.deleteHasStays") };
+    return { error: friendlyDbError(error, t) };
+  }
+  if (!data || data.length === 0) return { error: t("rooms.adminOnlyChange") };
+
+  refreshPages();
+  return {};
+}

@@ -77,7 +77,7 @@ export function RoomBoard({ rooms, isAdmin, lang }: { rooms: RoomStatusRow[]; is
             ) : null}
 
             {isAdmin && room.state !== "occupied" ? (
-              <RoomToggle roomId={room.id} active={room.is_active} lang={lang} />
+              <RoomToggle roomId={room.id} roomNumber={room.room_number} active={room.is_active} lang={lang} />
             ) : null}
           </li>
         );
