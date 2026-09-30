@@ -100,7 +100,7 @@ export default async function ReportsPage({ searchParams }: { searchParams: Sear
       </p>
 
       {/* ---------- headline numbers ---------- */}
-      <dl className="panel grid grid-cols-2 divide-x divide-y divide-ink-100 lg:grid-cols-5 lg:divide-y-0">
+      <dl className="panel grid grid-cols-2 overflow-hidden lg:grid-cols-3 2xl:grid-cols-5">
         <Metric
           label={t("reports.billed")}
           value={formatMoney(summary.billed, lang)}
@@ -128,7 +128,7 @@ export default async function ReportsPage({ searchParams }: { searchParams: Sear
         />
       </dl>
 
-      <div className="mt-6 grid gap-6 xl:grid-cols-2">
+      <div className="mt-6 grid gap-6 2xl:grid-cols-2">
         {/* ---------- payments ---------- */}
         <section className="panel p-5">
           <h2 className="font-serif text-lg font-semibold">{t("reports.byPayment")}</h2>
