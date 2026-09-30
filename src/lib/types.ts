@@ -43,6 +43,18 @@ export interface StayDetail {
   room_id: string;
   room_number: string;
   room_type: RoomType;
+  /** Who registered, checked out and last changed the stay (names of receptionists, or "Administrateur"). */
+  recorded_by_name: string | null;
+  checked_out_by_name: string | null;
+  last_edit_by_name: string | null;
+}
+
+/** One row of the `receptionists` table (the code hash is never read by the app). */
+export interface Receptionist {
+  id: string;
+  full_name: string;
+  is_active: boolean;
+  created_at: string;
 }
 
 /** One row of the `room_status` view. */

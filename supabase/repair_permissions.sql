@@ -22,6 +22,7 @@ begin
       ('guests',         'select, insert, update'),
       ('stays',          'select, insert, update'),
       ('app_settings',   'select, insert, update'),
+      ('receptionists',  'select, insert, update, delete'),
       ('stay_details',   'select'),
       ('room_status',    'select'),
       ('guest_summary',  'select')

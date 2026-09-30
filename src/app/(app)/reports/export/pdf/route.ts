@@ -158,12 +158,13 @@ async function buildReport(request: Request) {
   } else {
     doc.table(
       [
-        { header: t("reports.colGuest"), width: 3 },
+        { header: t("reports.colGuest"), width: 2.6 },
         { header: t("reports.colRoom"), width: 1 },
         { header: t("reports.colCheckIn"), width: 2 },
         { header: t("reports.colCheckOut"), width: 2 },
         { header: t("reports.colRate"), width: 1.4 },
         { header: t("reports.colPayment"), width: 1.4 },
+        { header: t("stays.col.staff"), width: 1.6 },
         { header: t("reports.colTotal"), width: 1.6, align: "right" },
       ],
       stays.map((stay) => [
@@ -173,6 +174,7 @@ async function buildReport(request: Request) {
         stamp(stay.actual_check_out ?? stay.expected_check_out),
         t(RATE_KIND_KEYS[stay.rate_kind ?? "night"]),
         t(PAYMENT_STATUS_KEYS[stay.payment_status]),
+        stay.recorded_by_name ?? "",
         money(stay.total_amount),
       ])
     );

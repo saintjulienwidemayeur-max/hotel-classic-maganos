@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { LanguageSwitch } from "@/components/layout/LanguageSwitch";
 import { PinForm } from "@/components/settings/PinForm";
 import { PageHeader } from "@/components/ui/PageHeader";
@@ -27,6 +28,11 @@ export default async function SettingsPage() {
   return (
     <>
       <PageHeader title={t("settings.title")} description={t("settings.desc")} />
+
+      <Link href="/receptionists" className="panel mb-6 flex items-center justify-between px-5 py-4 lg:hidden">
+        <span className="font-medium">{t("nav.receptionists")}</span>
+        <span aria-hidden="true">&rarr;</span>
+      </Link>
 
       <section className="mb-6">
         <h2 className="font-serif text-xl font-semibold">{t("settings.codes")}</h2>

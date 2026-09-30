@@ -1,4 +1,4 @@
-import { createHash, timingSafeEqual } from "node:crypto";
+import { createHash, createHmac, timingSafeEqual } from "node:crypto";
 import { PIN_LENGTH } from "./constants";
 
 /**
@@ -129,4 +129,24 @@ export function matchPin(pin: string, config: AccessConfig, overridden: AccessRo
   if (isAdmin) return "admin";
   if (isReception) return "reception";
   return null;
+}
+
+/**
+ * Tamper-proof cookie values (used to remember WHICH receptionist signed in).
+ * "<payload>.<hmac>" - the HMAC needs the server-only pepper, so the browser
+ * cannot forge or edit a name.
+ */
+export function signValue(payload: string): string {
+  const mac = createHmac("sha256", pepper()).update(payload).digest("base64url");
+  return `${Buffer.from(payload, "utf8").toString("base64url")}.${mac}`;
+}
+
+/** Returns the payload when the signature is valid, otherwise null. */
+export function verifyValue(signed: string | undefined): string | null {
+  if (!signed) return null;
+  const [body, mac] = signed.split(".");
+  if (!body || !mac) return null;
+  const payload = Buffer.from(body, "base64url").toString("utf8");
+  const expected = createHmac("sha256", pepper()).update(payload).digest("base64url");
+  return safeEqual(mac, expected) ? payload : null;
 }

@@ -19,6 +19,8 @@ export function friendlyDbError(error: { code?: string; message?: string } | nul
       if (message.includes("stays_one_active_per_room")) return t("err.roomBusy");
       if (message.includes("guests_id_number_key")) return t("err.idTaken");
       if (message.includes("rooms_room_number_key")) return t("err.roomExists");
+      if (message.includes("receptionists_name_key")) return t("recep.nameTaken");
+      if (message.includes("receptionists_pin_key")) return t("recep.codeTaken");
       return t("err.duplicate");
 
     case "23514": // check_violation
