@@ -5,6 +5,8 @@
 -- tells the administrator to take the room out of service instead. History of
 -- real stays is therefore never lost.
 
+drop policy if exists "rooms: admins delete" on public.rooms;
+
 create policy "rooms: admins delete"
   on public.rooms for delete to authenticated
   using (public.is_admin());
