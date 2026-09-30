@@ -117,7 +117,7 @@ export async function signInWithPin(_prev: FormState, formData: FormData): Promi
   if (role === "reception" && receptionistName) await rememberActor(receptionistName);
   else await forgetActor();
   // The administrator lands on the overview; reception lands straight on the check-in form.
-  redirect(role === "admin" ? "/dashboard" : "/stays/new");
+  redirect(role === "admin" ? "/dashboard?welcome=1" : "/stays/new?welcome=1");
 }
 
 /** Ends the session ("Lock") and clears the auth cookies. */
