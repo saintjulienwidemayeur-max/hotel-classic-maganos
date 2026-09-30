@@ -8,6 +8,8 @@ import type { Translate } from "./i18n";
 export function friendlyDbError(error: { code?: string; message?: string } | null | undefined, t: Translate): string {
   if (!error) return t("err.generic");
   const message = error.message ?? "";
+  // Shows up in the server logs (Render -> Logs) so the real cause is never hidden.
+  console.error("[db]", error.code, message);
 
   switch (error.code) {
     case "23P01": // exclusion_violation: stays_no_overlapping_bookings
@@ -24,6 +26,12 @@ export function friendlyDbError(error: { code?: string; message?: string } | nul
 
     case "42501": // insufficient_privilege (RLS)
       return t("err.forbidden");
+
+    case "42703": // undefined_column
+    case "42P01": // undefined_table
+    case "PGRST204": // column missing from the API schema cache
+    case "PGRST205": // table missing from the API schema cache
+      return t("err.dbOutdated");
 
     default:
       return t("err.saving");

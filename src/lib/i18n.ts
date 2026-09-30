@@ -326,6 +326,7 @@ const fr = {
   /* -------------------------------------------------------------- errors */
   "err.generic": "Une erreur s'est produite. Réessayez.",
   "err.saving": "Une erreur s'est produite pendant l'enregistrement. Réessayez.",
+  "err.dbOutdated": "La base de données n'est pas à jour (colonne ou table manquante). Exécutez le fichier supabase/apply_all_fixes.sql dans Supabase, puis réessayez.",
   "err.overlap": "Cette chambre est déjà réservée sur une partie de ces dates. Choisissez une autre chambre ou d'autres dates.",
   "err.roomBusy": "Cette chambre a déjà un client. Faites son départ d'abord.",
   "err.idTaken": "Un autre client est déjà enregistré avec cette pièce d'identité.",
@@ -667,6 +668,7 @@ const en: Record<MessageKey, string> = {
 
   "err.generic": "Something went wrong. Please try again.",
   "err.saving": "Something went wrong while saving. Please try again.",
+  "err.dbOutdated": "The database is out of date (missing column or table). Run supabase/apply_all_fixes.sql in Supabase, then try again.",
   "err.overlap": "That room is already booked for part of these dates. Choose another room or change the dates.",
   "err.roomBusy": "That room already has an active guest. Check them out first.",
   "err.idTaken": "Another guest is already registered with this ID or passport number.",
