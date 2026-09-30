@@ -171,7 +171,7 @@ export async function GET(request: Request) {
 
   const bytes = doc.build();
 
-  return new NextResponse(bytes, {
+  return new NextResponse(new Uint8Array(bytes) as unknown as BodyInit, {
     headers: {
       "Content-Type": "application/pdf",
       "Content-Disposition": `attachment; filename="rapport_${range.from}_${range.to}.pdf"`,
