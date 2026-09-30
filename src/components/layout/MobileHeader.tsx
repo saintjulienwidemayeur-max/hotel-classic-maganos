@@ -6,7 +6,7 @@ import { LanguageSwitch } from "./LanguageSwitch";
 import { SignOutButton } from "./SignOutButton";
 
 /** Slim top bar for phones and tablets (hidden from `lg` up, where the sidebar takes over). */
-export function MobileHeader({ profile, lang }: { profile: Profile; lang: Lang }) {
+export function MobileHeader({ profile, lang, staffName }: { profile: Profile; lang: Lang; staffName?: string | null }) {
   const t = translator(lang);
 
   return (
@@ -14,7 +14,7 @@ export function MobileHeader({ profile, lang }: { profile: Profile; lang: Lang }
       <Brand />
       <div className="flex items-center gap-2">
         {profile.role === "admin" ? <LanguageSwitch lang={lang} /> : null}
-        <span className="hidden text-xs font-medium text-ink-600 min-[380px]:inline">{t(ROLE_KEYS[profile.role])}</span>
+        <span className="hidden text-xs font-medium text-ink-600 min-[380px]:inline">{staffName ?? t(ROLE_KEYS[profile.role])}</span>
         <SignOutButton lang={lang} className="btn-secondary btn-sm" />
       </div>
     </header>
