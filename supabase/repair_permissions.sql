@@ -1,20 +1,39 @@
 -- =============================================================================
 -- REPAIR: access rights ("permission denied", "Votre compte n'a pas la permission")
 --
+-- IMPORTANT: run migration 6 (20260920000006_short_stay_and_settings.sql) FIRST, then this script.
 -- Safe to run as many times as you like, in Supabase -> SQL Editor.
 -- Run it when an administrator gets permission errors (dashboard, rooms, reports),
 -- typically because migration 3 or 6 stopped half way the first time.
 -- Changes no data: only grants, policies and the admin role.
 -- =============================================================================
 
--- 1) Table and view rights for signed-in staff (Row Level Security still decides who may do what)
-grant usage on schema public to authenticated;
-grant select, update                 on public.profiles to authenticated;
-grant select, insert, update, delete on public.rooms    to authenticated;
-grant select, insert, update         on public.guests   to authenticated;
-grant select, insert, update         on public.stays    to authenticated;
-grant select on public.stay_details, public.room_status, public.guest_summary to authenticated;
-grant select, insert, update         on public.app_settings to authenticated;
+-- 1) Table and view rights for signed-in staff (Row Level Security still decides who may do what).
+--    A table that does not exist yet (migration not run) is skipped with a notice.
+do $$
+declare
+  item record;
+begin
+  grant usage on schema public to authenticated;
+  for item in
+    select * from (values
+      ('profiles',       'select, update'),
+      ('rooms',          'select, insert, update, delete'),
+      ('guests',         'select, insert, update'),
+      ('stays',          'select, insert, update'),
+      ('app_settings',   'select, insert, update'),
+      ('stay_details',   'select'),
+      ('room_status',    'select'),
+      ('guest_summary',  'select')
+    ) as v(name, rights)
+  loop
+    if to_regclass('public.' || item.name) is null then
+      raise notice 'SKIPPED: public.% does not exist (run the matching migration)', item.name;
+    else
+      execute format('grant %s on public.%I to authenticated', item.rights, item.name);
+    end if;
+  end loop;
+end $$;
 
 -- 2) Functions (dashboard, reports, role checks)
 grant execute on all functions in schema public to authenticated;
