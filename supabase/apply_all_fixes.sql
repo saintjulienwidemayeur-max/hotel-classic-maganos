@@ -1,4 +1,11 @@
 -- =============================================================================
+-- ALL-IN-ONE FIX. Paste into Supabase -> SQL Editor -> Run. Safe to run twice.
+-- = migration 6 (short stay, app_settings, 2 room types) + migration 7 (delete room)
+--   + permissions repair. Migration 5 (reports) must already have been run.
+-- =============================================================================
+
+-- ######## 20260920000006_short_stay_and_settings.sql ########
+-- =============================================================================
 -- Magaños - migration 6
 --
 --   1. Room types reduced to TWO: single ("simple") and double.
@@ -431,3 +438,82 @@ $$;
 
 grant execute on function public.pin_override_roles()      to anon, authenticated;
 grant execute on function public.resolve_pin_hash(text)    to anon, authenticated;
+
+-- ######## 20260921000007_room_delete.sql ########
+-- Migration 7: let administrators delete a room.
+--
+-- Only a room that has never had a stay can be deleted: stays.room_id is
+-- "on delete restrict", so the database refuses otherwise (23503) and the app
+-- tells the administrator to take the room out of service instead. History of
+-- real stays is therefore never lost.
+
+drop policy if exists "rooms: admins delete" on public.rooms;
+
+create policy "rooms: admins delete"
+  on public.rooms for delete to authenticated
+  using (public.is_admin());
+
+-- ######## repair_permissions.sql ########
+-- =============================================================================
+-- REPAIR: access rights ("permission denied", "Votre compte n'a pas la permission")
+--
+-- IMPORTANT: run migration 6 (20260920000006_short_stay_and_settings.sql) FIRST, then this script.
+-- Safe to run as many times as you like, in Supabase -> SQL Editor.
+-- Run it when an administrator gets permission errors (dashboard, rooms, reports),
+-- typically because migration 3 or 6 stopped half way the first time.
+-- Changes no data: only grants, policies and the admin role.
+-- =============================================================================
+
+-- 1) Table and view rights for signed-in staff (Row Level Security still decides who may do what).
+--    A table that does not exist yet (migration not run) is skipped with a notice.
+do $$
+declare
+  item record;
+begin
+  grant usage on schema public to authenticated;
+  for item in
+    select * from (values
+      ('profiles',       'select, update'),
+      ('rooms',          'select, insert, update, delete'),
+      ('guests',         'select, insert, update'),
+      ('stays',          'select, insert, update'),
+      ('app_settings',   'select, insert, update'),
+      ('stay_details',   'select'),
+      ('room_status',    'select'),
+      ('guest_summary',  'select')
+    ) as v(name, rights)
+  loop
+    if to_regclass('public.' || item.name) is null then
+      raise notice 'SKIPPED: public.% does not exist (run the matching migration)', item.name;
+    else
+      execute format('grant %s on public.%I to authenticated', item.rights, item.name);
+    end if;
+  end loop;
+end $$;
+
+-- 2) Functions (dashboard, reports, role checks)
+grant execute on all functions in schema public to authenticated;
+
+-- 3) Room policies: only administrators add, change and delete rooms
+drop policy if exists "rooms: admins insert" on public.rooms;
+drop policy if exists "rooms: admins update" on public.rooms;
+drop policy if exists "rooms: admins delete" on public.rooms;
+
+create policy "rooms: admins insert" on public.rooms for insert to authenticated with check (public.is_admin());
+create policy "rooms: admins update" on public.rooms for update to authenticated
+  using (public.is_admin()) with check (public.is_admin());
+create policy "rooms: admins delete" on public.rooms for delete to authenticated using (public.is_admin());
+
+-- 4) CHECK: the two accounts behind the codes and their roles.
+--    The account of ADMIN_EMAIL must show role = admin, the reception one role = staff,
+--    both is_active = true.
+select u.email, p.role, p.is_active
+from auth.users u
+left join public.profiles p on p.id = u.id
+order by u.email;
+
+-- 5) If the administrator account shows a wrong role (or no row), fix it here:
+--    replace ADMIN_EMAIL_HERE with the exact ADMIN_EMAIL from Render, remove the "--" and run.
+-- insert into public.profiles (id, full_name, role, is_active)
+--   select id, 'Administrateur', 'admin', true from auth.users where email = 'ADMIN_EMAIL_HERE'
+--   on conflict (id) do update set role = 'admin', is_active = true;
