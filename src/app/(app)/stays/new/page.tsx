@@ -1,8 +1,11 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
+import { WelcomeBanner } from "@/components/layout/WelcomeBanner";
 import { StayForm } from "@/components/stays/StayForm";
 import { PageHeader } from "@/components/ui/PageHeader";
+import { getReceptionistName } from "@/lib/actor";
 import { getSession } from "@/lib/auth";
+import { greetingKey } from "@/lib/greeting";
 import { utcToLocalInput } from "@/lib/datetime";
 import { translator } from "@/lib/i18n";
 import { createClient } from "@/lib/supabase/server";
@@ -12,11 +15,20 @@ import { createStay } from "../actions";
 export const metadata: Metadata = { title: "Nouveau check-in" };
 
 /** Reception's main screen. The administrator is sent back to the overview. */
-export default async function NewStayPage() {
+export default async function NewStayPage({ searchParams }: { searchParams: Promise<{ welcome?: string }> }) {
+  const sp = await searchParams;
   const { profile } = await getSession();
   if (profile?.role === "admin") redirect("/dashboard");
 
   const t = translator("fr"); // reception is always French
+
+  // Greeting right after sign-in (?welcome=1), by name when this is a personal code.
+  let welcome: string | null = null;
+  if (sp.welcome) {
+    const name = await getReceptionistName();
+    const greeting = t(greetingKey());
+    welcome = name ? t("welcome.reception", { greeting, name }) : t("welcome.receptionNoName", { greeting });
+  }
   const supabase = await createClient();
 
   // room_status already knows which rooms are occupied right now.
@@ -48,6 +60,7 @@ export default async function NewStayPage() {
 
   return (
     <>
+      {welcome ? <WelcomeBanner message={welcome} closeLabel={t("welcome.close")} /> : null}
       <PageHeader title={t("form.newTitle")} description={t("form.newDesc")} />
       <StayForm
         mode="create"

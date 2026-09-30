@@ -27,20 +27,22 @@ export async function forgetActor() {
   store.set(ACTOR_COOKIE, "", { ...cookieOptions, maxAge: 0 });
 }
 
+/** The receptionist's name from the signed cookie, or null (shared code, old session, no cookie). */
+export async function getReceptionistName(): Promise<string | null> {
+  const store = await cookies();
+  const payload = verifyValue(store.get(ACTOR_COOKIE)?.value);
+  if (!payload) return null;
+  try {
+    const { name } = JSON.parse(payload) as { name?: string };
+    return typeof name === "string" && name.trim() ? name.trim().slice(0, 80) : null;
+  } catch {
+    return null;
+  }
+}
+
 /** The name to stamp on a transaction: "Administrateur", the receptionist's name, or a generic label. */
 export async function getActorName(): Promise<string> {
   const { profile } = await getSession();
   if (profile?.role === "admin") return "Administrateur";
-
-  const store = await cookies();
-  const payload = verifyValue(store.get(ACTOR_COOKIE)?.value);
-  if (payload) {
-    try {
-      const { name } = JSON.parse(payload) as { name?: string };
-      if (typeof name === "string" && name.trim()) return name.trim().slice(0, 80);
-    } catch {
-      /* fall through */
-    }
-  }
-  return "Réception";
+  return (await getReceptionistName()) ?? "Réception";
 }

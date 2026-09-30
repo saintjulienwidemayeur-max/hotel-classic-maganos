@@ -174,6 +174,10 @@ Open <http://localhost:3000> and enter a code. For a production check: `npm run 
 
 In production (HTTPS) the app is installable: Chrome/Edge/Android show an **Install the app** link (login screen and sidebar); on iPhone/iPad use Share -> Add to Home Screen. The service worker only caches an offline page, never guest data.
 
+## Keep-alive on Render
+
+Render's free plan puts an idle service to sleep after ~15 minutes. The app pings its own `/api/health` every 7 minutes while it runs (automatic on Render, which provides `RENDER_EXTERNAL_URL`). Options: `KEEP_ALIVE_URL`, `KEEP_ALIVE_MINUTES` (default 7), `KEEP_ALIVE=off`. A sleeping app cannot wake itself, so for full safety also point a free monitor (UptimeRobot, cron-job.org) at `https://YOUR-APP.onrender.com/api/health` every 5 minutes.
+
 ## Deploying
 
 Vercel works out of the box: import the repository, add **all** the environment variables from `.env.example` (including `PIN_PEPPER`), deploy, then add the deployed URL under **Authentication -> URL Configuration** in Supabase. `NEXT_PUBLIC_*` values are baked in at **build** time, so rebuild after changing any of them. The wrong-code counter lives in each server instance's memory, so lockout is best effort on serverless hosting (exact on a single Node process such as `npm start` on a hotel PC).

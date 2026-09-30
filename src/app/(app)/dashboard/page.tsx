@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
+import { WelcomeBanner } from "@/components/layout/WelcomeBanner";
 import { CompactStayList } from "@/components/stays/CompactStayList";
 import { Metric } from "@/components/ui/Metric";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { requireAdmin } from "@/lib/auth";
 import { todayRangeUtc } from "@/lib/datetime";
 import { formatLongDate } from "@/lib/format";
+import { greetingKey } from "@/lib/greeting";
 import { translator } from "@/lib/i18n";
 import { getLang } from "@/lib/lang";
 import { createClient } from "@/lib/supabase/server";
@@ -13,8 +15,9 @@ import type { DashboardStats, StayDetail } from "@/lib/types";
 export const metadata: Metadata = { title: "Aperçu" };
 
 /** The overview is the administrator's home screen. */
-export default async function DashboardPage() {
+export default async function DashboardPage({ searchParams }: { searchParams: Promise<{ welcome?: string }> }) {
   await requireAdmin();
+  const sp = await searchParams;
   const lang = await getLang();
   const t = translator(lang);
 
@@ -49,6 +52,13 @@ export default async function DashboardPage() {
 
   return (
     <>
+      {sp.welcome ? (
+        <WelcomeBanner
+          message={t("welcome.admin", { greeting: t(greetingKey()) })}
+          detail={t("welcome.adminStats", { a: stats.checked_in_guests, b: stats.available_rooms, c: stats.checkouts_today })}
+          closeLabel={t("welcome.close")}
+        />
+      ) : null}
       <PageHeader title={t("dash.title")} description={formatLongDate(new Date(), lang)} />
 
       {/* One ledger strip instead of four separate cards */}
