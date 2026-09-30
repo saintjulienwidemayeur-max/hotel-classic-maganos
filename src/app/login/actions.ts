@@ -2,6 +2,7 @@
 
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
+import { forgetActor, rememberActor } from "@/lib/actor";
 import { getAccessConfig, hashPin, isPinShaped, matchPin, type AccessRole } from "@/lib/access";
 import { PIN_LENGTH } from "@/lib/constants";
 import { translator } from "@/lib/i18n";
@@ -53,16 +54,31 @@ export async function signInWithPin(_prev: FormState, formData: FormData): Promi
   const supabase = await createClient();
 
   // Codes changed in the app live in the database (as a hash); the env file is the fallback.
-  const [storedRoleResult, overridesResult] = await Promise.all([
-    supabase.rpc("resolve_pin_hash", { p_hash: hashPin(pin) }),
+  const pinHash = hashPin(pin);
+  const [storedRoleResult, overridesResult, receptionistResult, countResult] = await Promise.all([
+    supabase.rpc("resolve_pin_hash", { p_hash: pinHash }),
     supabase.rpc("pin_override_roles"),
+    supabase.rpc("resolve_receptionist", { p_hash: pinHash }),
+    supabase.rpc("active_receptionist_count"),
   ]);
 
   const stored = storedRoleResult.data;
   const overridden = (Array.isArray(overridesResult.data) ? overridesResult.data : []) as AccessRole[];
 
-  const role: AccessRole | null =
+  let role: AccessRole | null =
     stored === "admin" || stored === "reception" ? stored : matchPin(pin, config, overridden);
+
+  // Personal receptionist codes. Once at least one receptionist exists, the old SHARED
+  // reception code is refused: every transaction must be traceable to a person.
+  const receptionist = (receptionistResult.data as { id: string; full_name: string }[] | null)?.[0] ?? null;
+  const activeReceptionists = typeof countResult.data === "number" ? countResult.data : 0;
+  let receptionistName: string | null = null;
+
+  if (role === "reception" && activeReceptionists > 0) role = null;
+  if (!role && receptionist) {
+    role = "reception";
+    receptionistName = receptionist.full_name;
+  }
 
   if (!role) {
     recordFailure(client);
@@ -98,6 +114,8 @@ export async function signInWithPin(_prev: FormState, formData: FormData): Promi
   }
 
   recordSuccess(client);
+  if (role === "reception" && receptionistName) await rememberActor(receptionistName);
+  else await forgetActor();
   // The administrator lands on the overview; reception lands straight on the check-in form.
   redirect(role === "admin" ? "/dashboard" : "/stays/new");
 }
@@ -106,5 +124,6 @@ export async function signInWithPin(_prev: FormState, formData: FormData): Promi
 export async function signOut() {
   const supabase = await createClient();
   await supabase.auth.signOut();
+  await forgetActor();
   redirect("/login");
 }

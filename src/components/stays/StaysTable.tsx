@@ -14,10 +14,13 @@ export function StaysTable({
   stays,
   lang,
   canCheckIn = true,
+  showStaff = false,
 }: {
   stays: StayDetail[];
   lang: Lang;
   canCheckIn?: boolean;
+  /** Administrator view: show which receptionist recorded / checked out each stay. */
+  showStaff?: boolean;
 }) {
   const now = Date.now();
   const t = translator(lang);
@@ -45,6 +48,15 @@ export function StaysTable({
     stay.rate_kind === "short"
       ? t("stays.shortStayTotal", { money: formatMoney(stay.total_amount, lang) })
       : t("stays.forNights", { money: formatMoney(stay.total_amount, lang), n: stay.nights });
+
+  /** "Recorded by X" / "Checked out by Y" lines (administrator only). */
+  const staffLines = (stay: StayDetail) =>
+    showStaff ? (
+      <div className="mt-1 text-xs text-ink-500">
+        {stay.recorded_by_name ? <div>{t("stays.recordedBy", { name: stay.recorded_by_name })}</div> : null}
+        {stay.checked_out_by_name ? <div>{t("stays.checkedOutBy", { name: stay.checked_out_by_name })}</div> : null}
+      </div>
+    ) : null;
 
   return (
     <>
@@ -80,6 +92,7 @@ export function StaysTable({
                     {arrivalLabel(stay)} {formatDateTime(stay.check_in, lang)}
                   </div>
                   <div className="text-ink-600">{departure(stay)}</div>
+                  {staffLines(stay)}
                 </td>
                 <td className="px-4 py-3.5">
                   <PaymentBadge status={stay.payment_status} lang={lang} />
@@ -144,6 +157,8 @@ export function StaysTable({
                 <dd className="text-ink-800">{totalLine(stay)}</dd>
               </div>
             </dl>
+
+            {staffLines(stay)}
 
             <div className="mt-4 border-t border-ink-100 pt-3">
               <StayActions stayId={stay.id} status={stay.status} lang={lang} canCheckIn={canCheckIn} />

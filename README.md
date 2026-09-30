@@ -92,6 +92,7 @@ Open **SQL Editor** and run the files in `supabase/migrations/` **in this order*
 6. `20260918000004_seed_sample_rooms.sql` - *optional* sample rooms; run it **after** step 5, or skip it and add rooms in the app
 
 7. `20260921000007_room_delete.sql` - lets the administrator **delete** a room (only one that never had a stay; otherwise take it out of service)
+8. `20260922000008_receptionists.sql` - **one personal 4-digit code per receptionist** (Réceptionnistes page) and who-did-what on every stay. Once one active receptionist exists, the old shared reception code stops working.
 
 Prefer the CLI? `supabase link --project-ref <ref>` then `supabase db push`.
 

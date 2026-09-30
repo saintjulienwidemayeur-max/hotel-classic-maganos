@@ -11,6 +11,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { getActorName } from "@/lib/actor";
 import { createClient } from "@/lib/supabase/server";
 import { zonedLocalToUtc } from "@/lib/datetime";
 import { friendlyDbError } from "@/lib/db-errors";
@@ -70,7 +71,11 @@ export async function createStay(_prev: FormState, formData: FormData): Promise<
   const expectedCheckOut = zonedLocalToUtc(v.expected_check_out);
   const status: StayStatus = checkIn.getTime() > Date.now() ? "pending" : "active";
 
+  const actor = await getActorName();
+
   const { error: stayError } = await supabase.from("stays").insert({
+    recorded_by_name: actor,
+    last_edit_by_name: actor,
     guest_id: guest.id,
     room_id: v.room_id,
     status,
@@ -134,9 +139,13 @@ export async function updateStay(stayId: string, _prev: FormState, formData: For
   const actualCheckOut =
     v.status === "checked_out" ? (existing.actual_check_out ?? new Date().toISOString()) : null;
 
+  const actor = await getActorName();
+
   const { data: updated, error: stayError } = await supabase
     .from("stays")
     .update({
+      last_edit_by_name: actor,
+      ...(v.status === "checked_out" && !existing.actual_check_out ? { checked_out_by_name: actor } : {}),
       room_id: v.room_id,
       status: v.status,
       check_in: zonedLocalToUtc(v.check_in).toISOString(),
@@ -176,9 +185,10 @@ async function transition(
   if (!uuidSchema.safeParse(stayId).success) return { error: t("action.notFound") };
 
   const supabase = await createClient();
+  const actor = await getActorName();
   const { data, error } = await supabase
     .from("stays")
-    .update(patch)
+    .update({ ...patch, last_edit_by_name: actor, ...(patch.status === "checked_out" ? { checked_out_by_name: actor } : {}) })
     .eq("id", stayId)
     .eq("status", from)
     .select("id");

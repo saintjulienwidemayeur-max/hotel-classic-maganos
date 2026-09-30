@@ -20,6 +20,7 @@ const ROOMS: NavItem = { href: "/rooms", labelKey: "nav.rooms", icon: IconBed };
 const NEW_ITEM: NavItem = { href: "/stays/new", labelKey: "nav.newCheckIn", icon: IconPlus };
 const REPORTS: NavItem = { href: "/reports", labelKey: "nav.reports", icon: IconChart };
 const GUESTS: NavItem = { href: "/guests", labelKey: "nav.guests", icon: IconUsers };
+const RECEPTIONISTS: NavItem = { href: "/receptionists", labelKey: "nav.receptionists", icon: IconUsers };
 const SETTINGS: NavItem = { href: "/settings", labelKey: "nav.settings", icon: IconSettings };
 
 /**
@@ -27,7 +28,7 @@ const SETTINGS: NavItem = { href: "/settings", labelKey: "nav.settings", icon: I
  *   administrator -> overview, stays, rooms, reports, guests, settings (NO check-in screen)
  *   reception     -> the check-in form and the list of stays (to check guests out)
  */
-const adminItems = [OVERVIEW, STAYS, ROOMS, REPORTS, GUESTS, SETTINGS];
+const adminItems = [OVERVIEW, STAYS, ROOMS, REPORTS, GUESTS, RECEPTIONISTS, SETTINGS];
 const receptionItems = [NEW_ITEM, STAYS];
 
 function isActive(pathname: string, item: NavItem) {
@@ -79,7 +80,7 @@ export function BottomNav({ isAdmin, lang }: { isAdmin: boolean; lang: Lang }) {
     >
       <ul className={`mx-auto grid max-w-md ${isAdmin ? "grid-cols-5" : "grid-cols-2"}`}>
         {items.map((item) => {
-          const active = isActive(pathname, item) || (item === REPORTS && pathname.startsWith("/guests"));
+          const active = isActive(pathname, item) || (item === REPORTS && pathname.startsWith("/guests")) || (item === SETTINGS && pathname.startsWith("/receptionists"));
           const isNew = item === NEW_ITEM;
           return (
             <li key={item.href}>

@@ -107,7 +107,7 @@ export default async function StaysPage({ searchParams }: { searchParams: Search
             <p className="mb-3 text-sm text-ink-600" aria-live="polite">
               {t("stays.found", { n: total })}
             </p>
-            <StaysTable stays={stays} lang={lang} canCheckIn={!isAdmin} />
+            <StaysTable stays={stays} lang={lang} canCheckIn={!isAdmin} showStaff={isAdmin} />
             <Pagination
               page={page}
               totalPages={totalPages}

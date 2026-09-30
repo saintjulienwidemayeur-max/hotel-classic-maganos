@@ -59,6 +59,7 @@ export async function GET(request: Request) {
       t("form.firstName"), t("form.lastName"), t("form.phone"), t("form.email"),
       t("form.idNumber"), t("form.address"),
       t("reports.colNights"), t("form.pricePerNight"), t("stays.col.total"), t("stays.col.payment"), t("form.notes"),
+      t("stays.col.staff"), t("stays.checkedOutBy", { name: "" }).trim(),
     ],
     stays.map((stay) => [
       localStamp(stay.check_in),
@@ -79,6 +80,8 @@ export async function GET(request: Request) {
       stay.total_amount,
       t(PAYMENT_STATUS_KEYS[stay.payment_status]),
       stay.notes,
+      stay.recorded_by_name,
+      stay.checked_out_by_name,
     ])
   );
 
