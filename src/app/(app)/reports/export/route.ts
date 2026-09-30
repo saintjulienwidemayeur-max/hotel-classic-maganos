@@ -67,7 +67,7 @@ export async function GET(request: Request) {
       t(STAY_STATUS_KEYS[stay.status]),
       stay.room_number,
       t(ROOM_TYPE_KEYS[stay.room_type]),
-      t(RATE_KIND_KEYS[stay.rate_kind]),
+      t(RATE_KIND_KEYS[stay.rate_kind ?? "night"]),
       stay.first_name,
       stay.last_name,
       stay.phone,
