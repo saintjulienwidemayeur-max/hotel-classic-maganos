@@ -52,7 +52,7 @@ export default async function DashboardPage() {
       <PageHeader title={t("dash.title")} description={formatLongDate(new Date(), lang)} />
 
       {/* One ledger strip instead of four separate cards */}
-      <dl className="panel grid grid-cols-2 divide-x divide-y divide-ink-100 lg:grid-cols-4 lg:divide-y-0">
+      <dl className="panel grid grid-cols-2 overflow-hidden lg:grid-cols-4">
         <Metric label={t("dash.guestsInHouse")} value={stats.checked_in_guests} note={t("dash.guestsInHouseNote")} />
         <Metric
           label={t("dash.roomsAvailable")}
