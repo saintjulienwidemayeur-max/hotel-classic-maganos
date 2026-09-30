@@ -29,25 +29,11 @@ drop function if exists public.report_summary(date, date, text);
 drop function if exists public.report_outstanding();
 
 -- -----------------------------------------------------------------------------
--- 1. Only two room types. Anything else becomes "double".
+-- 1. Only two room types are used. Anything else becomes "double".
 -- -----------------------------------------------------------------------------
--- Re-runnable: does nothing when the enum already has only the two values.
-do $$
-begin
-  if (select count(*) from pg_enum e join pg_type t on t.oid = e.enumtypid
-       where t.typname = 'room_type' and t.typnamespace = 'public'::regnamespace) > 2 then
-    alter type public.room_type rename to room_type_old;
-    create type public.room_type as enum ('single', 'double');
-
-    alter table public.rooms alter column room_type drop default;
-    alter table public.rooms
-      alter column room_type type public.room_type
-      using (case when room_type::text = 'single' then 'single' else 'double' end)::public.room_type;
-    alter table public.rooms alter column room_type set default 'double';
-
-    drop type public.room_type_old;
-  end if;
-end $$;
+-- The enum itself is left alone (other tables of yours may depend on it); the app
+-- only offers "single" and "double", and any room of another type becomes "double".
+update public.rooms set room_type = 'double' where room_type::text not in ('single', 'double');
 
 -- -----------------------------------------------------------------------------
 -- 2. Short stay
