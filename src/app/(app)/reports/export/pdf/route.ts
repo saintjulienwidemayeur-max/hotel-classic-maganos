@@ -22,6 +22,18 @@ const DAILY_LIMIT_DAYS = 62;
  * list of stays in the period. Administrators only.
  */
 export async function GET(request: Request) {
+  try {
+    return await buildReport(request);
+  } catch (error) {
+    console.error("[pdf] report failed:", error);
+    return new NextResponse("Le rapport PDF n'a pas pu être généré. Vérifiez que toutes les migrations SQL ont été exécutées.", {
+      status: 500,
+      headers: { "Content-Type": "text/plain; charset=utf-8" },
+    });
+  }
+}
+
+async function buildReport(request: Request) {
   const { profile } = await getSession();
   if (!profile || profile.role !== "admin") {
     return new NextResponse("Forbidden", { status: 403 });
@@ -86,7 +98,7 @@ export async function GET(request: Request) {
     { label: t("reports.billed"), value: money(summary.billed), note: t("reports.billedNote", { n: summary.checkins }) },
     { label: t("reports.occupancy"), value: `${summary.occupancy_pct}%`, note: t("reports.occupancyNote", { a: summary.occupied_room_nights, b: summary.available_room_nights }) },
     { label: t("reports.avgRate"), value: money(summary.avg_nightly_rate), note: t("reports.avgRateNote", { n: summary.avg_stay_nights }) },
-    { label: t("reports.shortStays"), value: String(summary.short_stays), note: t("reports.shortStaysNote", { money: money(summary.billed_short) }) },
+    { label: t("reports.shortStays"), value: String(summary.short_stays ?? 0), note: t("reports.shortStaysNote", { money: money(summary.billed_short ?? 0) }) },
     { label: t("reports.checkouts"), value: String(summary.checkouts), note: summary.cancelled > 0 ? t("reports.cancelledNote", { n: summary.cancelled }) : t("reports.noCancelled") },
   ]);
 
@@ -117,7 +129,7 @@ export async function GET(request: Request) {
     byType.length === 0
       ? [[t("reports.noRooms"), "", "", "", ""]]
       : byType.map((type) => [
-          t(ROOM_TYPE_KEYS[type.room_type]),
+          t(ROOM_TYPE_KEYS[type.room_type] ?? "roomType.double"),
           String(type.rooms_count),
           String(type.checkins),
           `${type.occupancy_pct}%`,
@@ -159,7 +171,7 @@ export async function GET(request: Request) {
         stay.room_number,
         stamp(stay.check_in),
         stamp(stay.actual_check_out ?? stay.expected_check_out),
-        t(RATE_KIND_KEYS[stay.rate_kind]),
+        t(RATE_KIND_KEYS[stay.rate_kind ?? "night"]),
         t(PAYMENT_STATUS_KEYS[stay.payment_status]),
         money(stay.total_amount),
       ])

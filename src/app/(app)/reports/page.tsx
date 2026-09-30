@@ -118,8 +118,8 @@ export default async function ReportsPage({ searchParams }: { searchParams: Sear
         />
         <Metric
           label={t("reports.shortStays")}
-          value={summary.short_stays}
-          note={t("reports.shortStaysNote", { money: formatMoney(summary.billed_short, lang) })}
+          value={summary.short_stays ?? 0}
+          note={t("reports.shortStaysNote", { money: formatMoney(summary.billed_short ?? 0, lang) })}
         />
         <Metric
           label={t("reports.checkouts")}
