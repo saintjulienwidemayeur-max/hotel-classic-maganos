@@ -417,3 +417,5 @@ $$;
 
 grant execute on function public.pin_override_roles()      to anon, authenticated;
 grant execute on function public.resolve_pin_hash(text)    to anon, authenticated;
+
+notify pgrst, 'reload schema';

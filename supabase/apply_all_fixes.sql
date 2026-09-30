@@ -503,3 +503,6 @@ order by u.email;
 -- insert into public.profiles (id, full_name, role, is_active)
 --   select id, 'Administrateur', 'admin', true from auth.users where email = 'ADMIN_EMAIL_HERE'
 --   on conflict (id) do update set role = 'admin', is_active = true;
+
+-- Make the API pick up the new columns straight away.
+notify pgrst, 'reload schema';
