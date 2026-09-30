@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { getSession } from "@/lib/auth";
+import { getReceptionistName } from "@/lib/actor";
 import { getLang } from "@/lib/lang";
 import { BottomNav } from "@/components/layout/NavLinks";
 import { IdleLock } from "@/components/layout/IdleLock";
@@ -26,11 +27,12 @@ export default async function AppLayout({ children }: { children: React.ReactNod
 
   const isAdmin = profile.role === "admin";
   const lang = await getLang(); // reception is always French
+  const staffName = isAdmin ? null : await getReceptionistName(); // shown instead of the generic "Réception"
 
   return (
     <div className="min-h-screen lg:pl-64">
-      <Sidebar profile={profile} lang={lang} />
-      <MobileHeader profile={profile} lang={lang} />
+      <Sidebar profile={profile} lang={lang} staffName={staffName} />
+      <MobileHeader profile={profile} lang={lang} staffName={staffName} />
       <main className="mx-auto w-full max-w-6xl px-4 pb-28 pt-6 sm:px-6 lg:px-8 lg:pb-12 lg:pt-10">{children}</main>
       <BottomNav isAdmin={isAdmin} lang={lang} />
       {isAdmin ? <IdleLock minutes={adminIdleMinutes()} /> : null}

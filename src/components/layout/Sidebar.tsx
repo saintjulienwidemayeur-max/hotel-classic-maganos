@@ -10,7 +10,7 @@ import { SideNav } from "./NavLinks";
 import { SignOutButton } from "./SignOutButton";
 
 /** Fixed left navigation for large screens (hidden below `lg`). */
-export function Sidebar({ profile, lang }: { profile: Profile; lang: Lang }) {
+export function Sidebar({ profile, lang, staffName }: { profile: Profile; lang: Lang; staffName?: string | null }) {
   const t = translator(lang);
   const isAdmin = profile.role === "admin";
 
@@ -33,8 +33,11 @@ export function Sidebar({ profile, lang }: { profile: Profile; lang: Lang }) {
       </div>
 
       <div className="mt-auto border-t border-ink-700 pt-4">
-        <p className="px-3 text-sm font-medium text-white">{t(ROLE_KEYS[profile.role])}</p>
-        <p className="px-3 text-xs text-ink-300">{isAdmin ? t("role.adminNote") : t("role.staffNote")}</p>
+        <p className="px-3 text-sm font-medium text-white">{staffName ?? t(ROLE_KEYS[profile.role])}</p>
+        <p className="px-3 text-xs text-ink-300">
+          {staffName ? `${t(ROLE_KEYS[profile.role])} - ` : ""}
+          {isAdmin ? t("role.adminNote") : t("role.staffNote")}
+        </p>
 
         {isAdmin ? (
           <div className="mt-3 px-3">
