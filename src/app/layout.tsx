@@ -25,6 +25,14 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="fr">
       <body>
+        {/* Capture the browser's install prompt as early as possible and keep it for the whole session,
+            so the install button still works after navigating between pages. */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html:
+              "window.addEventListener('beforeinstallprompt',function(e){e.preventDefault();window.__pwaPrompt=e;window.dispatchEvent(new Event('pwa-prompt-ready'));});",
+          }}
+        />
         {children}
         <PwaRegister />
       </body>

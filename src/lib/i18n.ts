@@ -259,6 +259,7 @@ const fr = {
   "rooms.deleteOccupied": "Un client est dans cette chambre. Faites son départ avant de la supprimer.",
   "pwa.install": "Installer l'application",
   "pwa.iosHelp": "Sur iPhone/iPad : touchez le bouton Partager, puis « Sur l'écran d'accueil ».",
+  "pwa.manualHelp": "Ouvrez le menu du navigateur (⋮) puis choisissez « Installer l'application » ou « Ajouter à l'écran d'accueil ».",
   "rooms.occupiedCannotClose": "Un client est dans cette chambre. Faites son départ avant de la mettre hors service.",
 
   /* -------------------------------------------------------------- reports */
@@ -637,6 +638,7 @@ const en: Record<MessageKey, string> = {
   "rooms.deleteOccupied": "A guest is in this room. Check them out before deleting it.",
   "pwa.install": "Install the app",
   "pwa.iosHelp": "On iPhone/iPad: tap the Share button, then \"Add to Home Screen\".",
+  "pwa.manualHelp": "Open the browser menu (⋮), then choose \"Install app\" or \"Add to Home screen\".",
   "rooms.occupiedCannotClose": "A guest is in this room. Check them out before taking it out of service.",
 
   "reports.title": "Reports",
