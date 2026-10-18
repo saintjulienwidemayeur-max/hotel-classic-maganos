@@ -9,9 +9,9 @@ interface InstallPromptEvent extends Event {
 }
 
 /**
- * "Install the app" button. Appears only when the browser says the app can be
- * installed (Chrome, Edge, Android). On iPhone/iPad, where there is no prompt,
- * it explains the Share -> Add to Home Screen steps instead.
+ * "Install the app" button. Uses the browser's install prompt when it is available
+ * (Chrome, Edge, Android). Otherwise (iPhone/iPad, or the browser has not offered the
+ * prompt) it explains how to install from the browser menu instead.
  */
 export function InstallButton({ lang = "fr", className = "btn-secondary btn-sm" }: { lang?: Lang; className?: string }) {
   const t = translator(lang);
@@ -27,24 +27,27 @@ export function InstallButton({ lang = "fr", className = "btn-secondary btn-sm" 
     setInstalled(standalone);
     setIsIos(/iphone|ipad|ipod/i.test(navigator.userAgent) && !standalone);
 
-    const onPrompt = (event: Event) => {
-      event.preventDefault();
-      setPromptEvent(event as InstallPromptEvent);
+    const saved = (window as Window & { __pwaPrompt?: Event }).__pwaPrompt;
+    if (saved) setPromptEvent(saved as InstallPromptEvent);
+
+    // The root layout stores the browser's one-time prompt on window so it survives page changes.
+    const onPrompt = () => {
+      const event = (window as Window & { __pwaPrompt?: Event }).__pwaPrompt;
+      if (event) setPromptEvent(event as InstallPromptEvent);
     };
     const onInstalled = () => {
       setInstalled(true);
       setPromptEvent(null);
     };
-    window.addEventListener("beforeinstallprompt", onPrompt);
+    window.addEventListener("pwa-prompt-ready", onPrompt);
     window.addEventListener("appinstalled", onInstalled);
     return () => {
-      window.removeEventListener("beforeinstallprompt", onPrompt);
+      window.removeEventListener("pwa-prompt-ready", onPrompt);
       window.removeEventListener("appinstalled", onInstalled);
     };
   }, []);
 
   if (installed) return null;
-  if (!promptEvent && !isIos) return null;
 
   return (
     <div>
@@ -55,6 +58,7 @@ export function InstallButton({ lang = "fr", className = "btn-secondary btn-sm" 
           if (promptEvent) {
             await promptEvent.prompt();
             await promptEvent.userChoice;
+            (window as Window & { __pwaPrompt?: Event }).__pwaPrompt = undefined;
             setPromptEvent(null);
           } else {
             setShowHelp((open) => !open);
@@ -63,7 +67,7 @@ export function InstallButton({ lang = "fr", className = "btn-secondary btn-sm" 
       >
         {t("pwa.install")}
       </button>
-      {showHelp ? <p className="mt-2 max-w-xs text-xs text-ink-600">{t("pwa.iosHelp")}</p> : null}
+      {showHelp ? <p className="mt-2 max-w-xs text-xs text-ink-600">{isIos ? t("pwa.iosHelp") : t("pwa.manualHelp")}</p> : null}
     </div>
   );
 }
